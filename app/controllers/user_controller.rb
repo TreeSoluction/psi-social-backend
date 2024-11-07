@@ -1,4 +1,20 @@
 class UserController < ApplicationController
+  before_action :authorize_request, except: :create
+  before_action :find_user, except: %i[create index]
+
+  def authorize_request
+    header = request.headers["Authorization"]
+    header = header.split(" ").last if header
+    begin
+      @decoded = JsonWebToken.decode(header)
+      @current_user = User.find(@decoded[:user_id])
+    rescue ActiveRecord::RecordNotFound => e
+      render json: { errors: e.message }, status: :unauthorized
+    rescue JWT::DecodeError => e
+      render json: { errors: e.message }, status: :unauthorized
+    end
+  end
+
   def index
     render json: User.all
   end
@@ -17,21 +33,7 @@ class UserController < ApplicationController
     end
   end
 
-  # TODO ADD BEARER TOKEN
-  def login
-    user = User.find_by(email: user_login_params[:email])
-    if user && user.authenticate(user_login_params[:password])
-      puts "logged in"
-    else
-      puts "wrong password"
-    end
-  end
-
   def user_params
     params.require(:user).permit(:name, :email, :password)
-  end
-
-  def user_login_params
-    params.require(:user).permit(:email, :password)
   end
 end

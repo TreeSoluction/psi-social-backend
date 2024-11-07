@@ -18,8 +18,11 @@ gem "stimulus-rails"
 gem "jbuilder"
 # postgres
 gem "pg"
+# for .env files
 gem "dotenv-rails"
+# security
 gem "bcrypt"
+gem "jwt"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
