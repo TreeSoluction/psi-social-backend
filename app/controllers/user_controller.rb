@@ -1,6 +1,5 @@
 class UserController < ApplicationController
   before_action :authorize_request, except: :create
-  before_action :show, except: %i[create index]
 
   def authorize_request
     header = request.headers["Authorization"]
@@ -33,7 +32,20 @@ class UserController < ApplicationController
     end
   end
 
+  def update
+    user = User.find(params[:id])
+    if user.update_column(:name, user_update_params[:name])
+      render json: user, status: :ok
+    else
+      render json: user.errors, status: :unprocessable_entity
+    end
+  end
+
   def user_params
     params.require(:user).permit(:name, :email, :password)
+  end
+
+  def user_update_params
+    params.require(:user).permit(:name)
   end
 end
